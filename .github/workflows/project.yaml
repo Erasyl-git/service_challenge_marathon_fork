@@ -1,0 +1,39 @@
+name: Service Challenge CI/CD
+run-name: Service Challenge
+on:
+  push:
+    branches:
+      - master
+
+jobs:
+  service-challenge:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository code
+        uses: actions/checkout@v3
+      
+      - name: Set Up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.12'
+
+      - name: Set Up Docker
+        uses: docker/setup-buildx-action@v2
+
+      - name: Set ssh key
+        uses: webfactory/ssh-agent@v0.5.3
+        with:
+          ssh-private-key: ${{ secrets.PRIVATE_SECRET_KEY }}
+      
+      - name: Copy files to server
+        run: |
+          rsync -avz --rsh="ssh -o StrictHostKeyChecking=no" . deployer@178.88.115.140:/home/deployer/service_challenge_marathon
+          
+      - name: Container building and restarting
+        run: |
+          ssh deployer@178.88.115.140 << 'EOF'
+          cd /home/deployer/service_challenge_marathon/ || exit 1
+          docker compose down --remove-orphans
+          docker compose up -d --build
+          EOF
+
