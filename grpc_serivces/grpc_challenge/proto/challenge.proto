@@ -1,0 +1,77 @@
+syntax = "proto3";
+
+package challenge;
+
+
+
+message RequestReceipt {
+
+    string sport_type_title = 1;
+
+    string challange_title = 2;
+
+
+}
+
+
+message ResponseChallengeId {
+
+    int32 id = 1;
+
+
+}
+
+
+message GetInfo{
+    string name = 1;
+    string photo = 2;
+    string cv_name = 3;
+
+}
+
+
+message Challenges {
+    string name = 1;
+    string photo = 2;
+    string cv_name = 3;
+    string description = 4;
+}
+
+message UserID {
+    int32 user_id = 1;
+    string period = 2;
+}
+
+message HistoryInfo {
+
+    int32 challenges = 1;
+    int32 calories = 2;
+
+
+}
+
+
+
+message User {
+
+    int32 user_id = 1;
+
+}
+
+
+message WeekHistory {
+
+    map<string, int32> days = 1;
+
+}
+
+
+service ServiceChallenge {
+
+    rpc GetChallengeId (RequestReceipt) returns (ResponseChallengeId);
+    rpc GetInfoId (ResponseChallengeId) returns (GetInfo);
+    rpc GetChallenges (ResponseChallengeId) returns (Challenges);
+    rpc ProgressInfo (UserID) returns (HistoryInfo);
+    rpc WeekProgressInfo (User) returns (WeekHistory);
+
+}

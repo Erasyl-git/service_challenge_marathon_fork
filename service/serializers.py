@@ -1,0 +1,91 @@
+from rest_framework import serializers
+
+from .models import Challenge, ChallengeMarathon, ChallengeMarathonUser, MarathonDays, MarathonDayUser
+
+import datetime
+
+from utils.s3_operations import S3Service
+from grpc_serivces.grpc_challenge.client import ChallengeInfo
+from utils.langs import LangsSignleton
+
+
+class ChallengeSerializer(serializers.ModelSerializer):
+
+    cv_name = serializers.SerializerMethodField()
+
+
+    class Meta:
+
+        model = Challenge
+        fields = ["cv_name", "approach", "number_times"]
+
+    def get_cv_name(self, obj):
+
+        cv_name = ChallengeInfo().get_challenge(obj.challenge_id).cv_name
+
+        return str(cv_name)
+
+
+
+
+class MarathonSerializer(serializers.ModelSerializer):
+
+    class Meta:
+
+        model = ChallengeMarathon
+        fields = ["id", "start_date", "name"]
+
+    def to_representation(self, instance):
+        data = super().to_representation(instance)
+
+        today = datetime.date.today()
+
+        data["active"] =  today >= instance.start_date and today <= instance.end_date
+
+        return data
+
+
+class MarathonDetailSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = ChallengeMarathon
+        fields = ["name", "start_date", "end_date", "min_age", "max_age", "descriptions"]
+
+
+    def to_representation(self, instance):
+        data = super().to_representation(instance)
+
+        data["image"] = S3Service().get_presigned_url(f"{instance.folder}/{instance.image}")
+        challenges = self.context.get("challenges")
+
+        lang = self.context.get("lang", "ru")
+
+        langs = LangsSignleton(lang)
+
+        if challenges is not None:
+
+            data["challenges"] = ChallengeSerializer(challenges, many=True).data
+
+        data["gender"] = ", ".join(filter(None, [instance.man*langs.lang_msg("men"), instance.woman*langs.lang_msg("women")]))
+
+        return data
+        
+
+class MarathonDayUserSerializer(serializers.ModelSerializer):
+
+    class Meta:
+
+        model = MarathonDayUser
+        fields = ()
+
+    def to_representation(self, instance):
+        data = super().to_representation(instance)
+        challenges = instance.marathon_day.marathon.challenges.filter(challenge_id=instance.challenge.challenge_id).first()
+        data["current_approach"] = challenges.approach
+        data["user_approach"] = self.context.get("approach", 0)
+        data["current_times"] = challenges.number_times
+        data["user_times"] = instance.number_times
+
+        return data
+    
+
