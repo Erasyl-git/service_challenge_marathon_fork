@@ -20,7 +20,7 @@ services:
 
   redis:
     image: redis
-    container_name: redis
+    container_name: redis_marathon
     networks:
       network:
         ipv4_address: 172.24.0.16
