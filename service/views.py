@@ -253,7 +253,7 @@ class MarathonDayAPIView(APIView):
 
    
     def get(self, request, marathon_id):
-        user_id = 69#request.user.id
+        user_id = request.user.id
         today = timezone.now().date()
 
         # 1️⃣ все дни марафона
@@ -339,10 +339,10 @@ class MarathonDayAPIView(APIView):
         user_id = request.user.id
 
         marathon = get_object_or_404(ChallengeMarathon, pk=marathon_id, user__user_id=user_id)
-
+        pk = marathon.pk
         marathon.delete()
 
-        return Response({"message": "success"}, status=status.HTTP_204_NO_CONTENT)
+        return Response({"message": pk}, status=status.HTTP_200_OK)
 
     
 
