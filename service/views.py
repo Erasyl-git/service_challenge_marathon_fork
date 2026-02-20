@@ -60,6 +60,12 @@ class ChallengeMarathonAPIView(APIView):
 
         return Response(self.serializer_class(queryset, many=True).data, status=status.HTTP_200_OK)
     
+    def str_to_bool(self, value):
+        if isinstance(value, bool):
+            return value
+        if isinstance(value, str):
+            return value.lower() in ("true")
+        return False  
 
     def post(self, request):
         lang = request.query_params.get("lang", "ru")
@@ -74,16 +80,16 @@ class ChallengeMarathonAPIView(APIView):
 
         end_date = request.data.get("end_date")
 
-        man = request.data.get("man")
+        man = self.str_to_bool(request.data.get("man"))
         
-        woman = request.data.get("woman")
+        woman = self.str_to_bool(request.data.get("woman"))
+        points = self.str_to_bool(request.data.get("points", False))
+        callories = self.str_to_bool(request.data.get("callories", False))
 
         min_age = request.data.get("min_age")
         max_age = request.data.get("max_age")
 
         descriptions = request.data.get("descriptions")
-        points = request.data.get("points", False)
-        callories = request.data.get("callories", False)
 
         if not "image" in request.FILES:
 
