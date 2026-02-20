@@ -92,7 +92,7 @@ class ChallengeMarathonAPIView(APIView):
         image = request.FILES.get("image")
 
         if (len(challenges) == 0):
-            return Response({"message": langs.lang_msg("challenge_empty")}, status=status.HTTP_400_BAD_REQUEST)
+            return Response({"message": langs.lang_msg("challenge_empty").format(challenge_empty=str(challenges))}, status=status.HTTP_400_BAD_REQUEST)
 
         try:
             start_date = datetime.datetime.strptime(start_date, "%Y-%m-%d").date()
