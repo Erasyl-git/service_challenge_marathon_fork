@@ -22,15 +22,12 @@ SECRET_KEY = 'django-insecure-vno@@2c&i@krlrv+*e!glomj(ac+*g7uguc^wtbt2pyv67^^vq
 CORS_ALLOW_ALL_ORIGINS = True
 
 
+DEBUG = True
+
 SECURE_SSL_REDIRECT = True
 SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
 
-DEBUG = True
-
-ALLOWED_HOSTS = ["192.168.0.215", "127.0.0.1", "www.aisport.kz", "aisport.kz", "api.aisport.kz", '178.88.115.140', '178.88.115.141', '178.88.115.142']
-
-
-# SECURITY WARNING: don't run with debug turned on in production!
+ALLOWED_HOSTS = ["aisport.kz", "api.aisport.kz", "127.0.0.1", "178.88.115.140"]
 
 
 # Application definition
@@ -45,7 +42,8 @@ INSTALLED_APPS = [
     'service',
 
     'corsheaders',
-    'rest_framework'
+    'rest_framework',
+    'corsheaders'
 ]
 
 MIDDLEWARE = [
