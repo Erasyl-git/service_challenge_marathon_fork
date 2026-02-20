@@ -16,7 +16,7 @@ load_dotenv(BASE_DIR / ".env")
 # See https://docs.djangoproject.com/en/6.0/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'django-insecure-z4%pe^=f=kg%u15oc-mf*8bc#ow!r1rk$xmrr-&sbi=vch93%x'
+SECRET_KEY = 'django-insecure-vno@@2c&i@krlrv+*e!glomj(ac+*g7uguc^wtbt2pyv67^^vq'
 
 
 CORS_ALLOW_ALL_ORIGINS = True
