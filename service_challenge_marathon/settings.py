@@ -27,7 +27,7 @@ SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
 
 DEBUG = True
 
-ALLOWED_HOSTS = ["192.168.0.215", "127.0.0.1", "www.aisport.kz", "aisport.kz", "api.aisport.kz", '178.88.115.140', '178.88.115.141']
+ALLOWED_HOSTS = ["192.168.0.215", "127.0.0.1", "www.aisport.kz", "aisport.kz", "api.aisport.kz", '178.88.115.140', '178.88.115.141', '178.88.115.142']
 
 
 # SECURITY WARNING: don't run with debug turned on in production!
