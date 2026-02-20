@@ -25,6 +25,7 @@ class Challenge(models.Model):
 
 
 
+
 class ChallengeMarathon(models.Model):
 
     user = models.ForeignKey(UserSmall, on_delete=models.CASCADE)
@@ -50,6 +51,21 @@ class ChallengeMarathon(models.Model):
     max_age = models.IntegerField()
 
     descriptions = models.TextField(max_length=300)
+
+
+    def get_all_users(self):
+        """
+        Возвращает всех пользователей этого марафона и их записи.
+        """
+        # берем всех участников марафона через ChallengeMarathonUser
+        user_ids = ChallengeMarathonUser.objects.filter(
+            marathon=self
+        ).values_list("user_id", flat=True)
+
+        # получаем самих юзеров и сразу подгружаем их записи по дням
+        return UserSmall.objects.filter(
+            id__in=user_ids
+        ).prefetch_related("marathon_day_usersmall")
 
 
 class ChallengeMarathonUser(models.Model):
@@ -84,11 +100,15 @@ class MarathonDayUser(models.Model):
     folder = models.CharField(default="marathon-day-user")
 
     video = models.CharField()
-    
+
+
+    status = models.CharField(choices=[("success", "success"), ("warning", "warning")], max_length=10)    
+
 
     class Meta:
         indexes = [
-            models.Index(fields=["user", "marathon_day"]),
+            models.Index(fields=["user", "marathon_day", "challenge"]),
         ]
+
 
 

@@ -8,6 +8,7 @@ from utils.s3_operations import S3Service
 from grpc_serivces.grpc_challenge.client import ChallengeInfo
 from utils.langs import LangsSignleton
 
+from grpc_serivces.grpc_profile.client import ProfileInfo
 
 class ChallengeSerializer(serializers.ModelSerializer):
 
@@ -87,5 +88,50 @@ class MarathonDayUserSerializer(serializers.ModelSerializer):
         data["user_times"] = instance.number_times
 
         return data
-    
 
+class StatisticUsersMarathonSerializer(serializers.Serializer):
+    user_id = serializers.IntegerField(read_only=True)
+    age = serializers.IntegerField(source="user.age", read_only=True)
+    success_days = serializers.IntegerField(read_only=True)
+    failed_days = serializers.IntegerField(read_only=True)
+    warning_days = serializers.IntegerField(read_only=True)
+    callories = serializers.DecimalField(max_digits=10, decimal_places=2, read_only=True)
+    scores = serializers.IntegerField(read_only=True)
+    name = serializers.CharField(read_only=True)
+    gender = serializers.CharField(read_only=True)
+    image = serializers.CharField(read_only=True)   
+
+    def to_representation(self, instance):
+        data = super().to_representation(instance)
+        user = instance["user"]
+        lang = self.context.get("lang", "ru")
+        langs = LangsSignleton(lang)
+
+        profile_user = ProfileInfo()
+        profile_data = profile_user.get_profile(user.user_id)
+
+        data["image"] = profile_data.image
+        data["name"] = profile_data.first_name
+        data["gender"] = langs.lang_msg("man" if user.male else "woman")
+
+        return data
+
+
+
+class ChallengeDailySerializer(serializers.ModelSerializer):
+
+    video = serializers.SerializerMethodField()
+
+    class Meta:
+
+        model = MarathonDayUser
+        fields = ["video"]
+
+    def get_video(self, obj):
+
+        ...
+
+
+# class StatisticUserDetailSerializer(serializers.ModelSerializer):
+
+#     ...

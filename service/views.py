@@ -4,7 +4,17 @@ from rest_framework import status
 from django.shortcuts import get_list_or_404, get_object_or_404
 from rest_framework.permissions import AllowAny
 from django.db import transaction
-from django.db.models import Count, Q, F, Case, When, Value, CharField
+from django.db.models import Sum, Count, Q, OuterRef, Subquery, IntegerField, Prefetch
+from django.db.models.functions import Coalesce
+from django.db.models import (
+    Sum,
+    Count,
+    Q,
+    F,
+    Value,
+    IntegerField,
+    DecimalField
+)
 from django.utils import timezone
 import datetime
 import json
@@ -17,7 +27,7 @@ from grpc_serivces.grpc_challenge.client import ChallengeInfo
 from grpc_serivces.grpc_profile.client import ProfileInfo
 
 from .models import ChallengeMarathon, Challenge, MarathonDays, ChallengeMarathonUser, UserSmall, MarathonDayUser
-from .serializers import MarathonDetailSerializer, MarathonSerializer, MarathonDayUserSerializer
+from .serializers import MarathonDetailSerializer, MarathonSerializer, MarathonDayUserSerializer, StatisticUsersMarathonSerializer
 
 from utils.langs import LangsSignleton
 from utils.s3_operations import S3Service
@@ -237,7 +247,7 @@ class MarathonDayAPIView(APIView):
 
    
     def get(self, request, marathon_id):
-        user_id = request.user.id
+        user_id = 69#request.user.id
         today = timezone.now().date()
 
         # 1️⃣ все дни марафона
@@ -422,6 +432,8 @@ class MarathonDayUserAPIView(APIView):
                 status=status.HTTP_403_FORBIDDEN
             )
         
+        status = "success" if number_times == challenge.number_times else "warning"
+        
         user = get_object_or_404(UserSmall, user_id=user_id)
 
         with transaction.atomic():
@@ -441,7 +453,70 @@ class MarathonDayUserAPIView(APIView):
             )
 
         return Response({"message": "success"}, status=status.HTTP_200_OK)
-        
+  
+  
+
+
+class StatisticUserMarathonAPIView(APIView):
+    serializer_class = StatisticUsersMarathonSerializer
+    permission_classes = [AllowAny]
+
+    def get(self, request, marathon_id):
+        lang = request.query_params.get("lang", "ru")
+        order_by_field = request.query_params.get("order_by", None)
+        direction = request.query_params.get("direction", "desc")
+
+        marathon = get_object_or_404(ChallengeMarathon, pk=marathon_id)
+
+        result = []
+        for user in marathon.get_all_users():
+            success_day = 0
+            warning_day = 0
+            failed_day = 0
+            calories = 0.0
+            scores = 0
+
+            for ch in marathon.challenges.all():
+                days = MarathonDays.objects.filter(marathon=marathon).order_by("date")
+                for day in days:
+                    user_marathon = MarathonDayUser.objects.filter(
+                        user=user, challenge=ch, marathon_day=day
+                    )
+
+                    if not user_marathon.exists():
+                        failed_day += 1
+                        continue
+
+                    if user_marathon.filter(status="success").count() == ch.approach:
+                        success_day += 1
+                    else:
+                        warning_day += 1
+
+                    calories += float(user_marathon.aggregate(callories=Sum("callories"))["callories"] or 0)
+                    scores += int(user_marathon.aggregate(score=Sum("score"))["score"] or 0)
+
+            result.append({
+                "user": user,
+                "user_id": user.user_id,
+                "success_days": success_day,
+                "failed_days": failed_day,
+                "warning_days": warning_day,
+                "callories": calories,
+                "scores": scores
+            })
+
+        # сортировка
+        if order_by_field in {"failed_days", "success_days", "warning_days", "callories", "scores"}:
+            reverse = direction == "desc"
+            result.sort(key=lambda x: x[order_by_field], reverse=reverse)
+
+        serializer = self.serializer_class(result, many=True, context={"lang": lang})
+        return Response({"users": serializer.data})
+
+
+class UserStaticUserDetailAPIView(APIView):
+    ...
+
 
 
 

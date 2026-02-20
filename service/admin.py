@@ -13,7 +13,7 @@ class UserSmallAdmin(admin.ModelAdmin):
 
 @admin.register(Challenge)
 class ChallengeAdmin(admin.ModelAdmin):
-    list_display = ("challenge_id", "approach", "number_times")
+    list_display = ("id", "challenge_id", "approach", "number_times")
     search_fields = ("challenge_id",)
 
 
