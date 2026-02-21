@@ -437,7 +437,7 @@ class MarathonDayUserAPIView(APIView):
 
         today = datetime.date.today()
 
-        marathon_day = MarathonDays.objects.filter(date=today, marathon=marathon).first()
+        marathon_day = MarathonDays.objects.filter(date=today, marathon=marathon)
 
         if not marathon_day.exists():
             return Response({"message": langs.lang_msg("date_out")}, status=status.HTTP_403_FORBIDDEN)
@@ -447,6 +447,8 @@ class MarathonDayUserAPIView(APIView):
                 {"message": langs.lang_msg("out_date")},
                 status=status.HTTP_403_FORBIDDEN
             )
+        
+        marathon_day = marathon_day.first()
         
         status_ = "success" if number_times == challenge.number_times else "warning"
         
