@@ -79,16 +79,16 @@ class MarathonDayUserSerializer(serializers.ModelSerializer):
 
     class Meta:
 
-        model = MarathonDayUser
+        model = MarathonDays
         fields = ()
 
     def to_representation(self, instance):
         data = super().to_representation(instance)
-        challenges = instance.marathon_day.marathon.challenges.filter(challenge_id=instance.challenge.challenge_id).first()
-        data["current_approach"] = challenges.approach
+        challenges = instance.marathon.challenges.filter(challenge_id=self.context.get("challenge_id", 0)).first()
+        data["current_approach"] = challenges.approach 
         data["user_approach"] = self.context.get("approach", 0)
         data["current_times"] = challenges.number_times
-        data["user_times"] = instance.number_times
+        data["user_times"] = self.context.get("number_times", 0)
 
         return data
 

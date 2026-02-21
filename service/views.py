@@ -362,7 +362,7 @@ class MarathonDayUserAPIView(APIView):
 
     def get(self, request, marathon_id):
 
-        user_id = request.user.id
+        user_id = 69# request.user.id
         lang = request.query_params.get("lang", "ru")
 
 
@@ -395,8 +395,13 @@ class MarathonDayUserAPIView(APIView):
 
         marathon_day_user = MarathonDayUser.objects.filter(user__user_id=user_id, marathon_day=marathon_day, challenge=challenge).order_by("-marathon_day__date")
 
+        marathon_user = marathon_day_user.first()
 
-        return Response(self.serializer_class(marathon_day_user.first(), context={"approach": marathon_day_user.count()}).data, status=status.HTTP_200_OK)
+        return Response(self.serializer_class(marathon_day, 
+                                              context={"approach": marathon_day_user.count(), 
+                                                       "challenge_id": challenge_id, 
+                                                       "number_times": marathon_user.number_times if marathon_user else 0}).data, 
+                                              status=status.HTTP_200_OK)
 
 
     def post(self, request, marathon_id):
