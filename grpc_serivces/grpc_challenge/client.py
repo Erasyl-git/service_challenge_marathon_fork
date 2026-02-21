@@ -19,7 +19,7 @@ class ChallengeInfo:
 
     def __init__(self) -> None:
 
-        channel__ = grpc.insecure_channel("178.88.115.140:50057")
+        channel__ = grpc.insecure_channel("service_challange:50057")
 
         self.stub_ = challenge_pb2_grpc.ServiceChallengeStub(channel__)
 

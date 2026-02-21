@@ -6,7 +6,7 @@ services:
     container_name: service_challenge_marathon
     networks:
       network:
-        ipv4_address: 172.24.0.15
+        - ai_network
     restart: unless-stopped
     env_file: 
       - .env
@@ -18,22 +18,16 @@ services:
     ports:
       - "8009:8009"
 
-  redis:
-    image: redis
-    container_name: redis_marathon
-    networks:
-      network:
-        ipv4_address: 172.24.0.16
-    restart: unless-stopped
+  # redis:
+  #   image: redis
+  #   container_name: redis_marathon
+  #   networks:
+  #     network:
+  #       ipv4_address: 172.24.0.16
+  #   restart: unless-stopped
 
 
     
 networks:
-  network:
-    driver: bridge
-    ipam:
-      config:
-        - subnet: 172.24.0.0/16
-
-    
-    
+  ai_network:
+    external: true

@@ -334,6 +334,7 @@ class MarathonDayAPIView(APIView):
         return Response(response)
     
 
+
     def delete(self, request, marathon_id):
 
         user_id = request.user.id
