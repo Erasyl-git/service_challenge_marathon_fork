@@ -27,7 +27,7 @@ from grpc_serivces.grpc_challenge.client import ChallengeInfo
 from grpc_serivces.grpc_profile.client import ProfileInfo
 
 from .models import ChallengeMarathon, Challenge, MarathonDays, ChallengeMarathonUser, UserSmall, MarathonDayUser
-from .serializers import MarathonDetailSerializer, MarathonSerializer, MarathonDayUserSerializer, StatisticUsersMarathonSerializer
+from .serializers import MarathonDetailSerializer, MarathonSerializer, MarathonDayUserSerializer, StatisticUsersMarathonSerializer, ChallengeDailySerializer
 
 from utils.langs import LangsSignleton
 from utils.s3_operations import S3Service
@@ -370,6 +370,7 @@ class MarathonDayUserAPIView(APIView):
         langs = LangsSignleton(lang)
 
         if challenge_id is None:
+            print(challenge_id)
             return Response({"message": langs.lang_msg("challenge_id_none")}, status=status.HTTP_400_BAD_REQUEST)
         
         marathon = get_object_or_404(ChallengeMarathon, pk=marathon_id)
@@ -379,6 +380,8 @@ class MarathonDayUserAPIView(APIView):
                 challenge_id=challenge_id,
                 marathon_challenge=marathon
             )
+        
+        print("challenges", challenge)
         
         today = datetime.date.today()
 
@@ -391,6 +394,7 @@ class MarathonDayUserAPIView(APIView):
         marathon_day = get_object_or_404(MarathonDays, marathon=marathon, date=today)
 
         marathon_day_user = MarathonDayUser.objects.filter(user__user_id=user_id, marathon_day=marathon_day, challenge=challenge).order_by("-marathon_day__date")
+
 
         return Response(self.serializer_class(marathon_day_user.first(), context={"approach": marathon_day_user.count()}).data, status=status.HTTP_200_OK)
 
@@ -431,7 +435,7 @@ class MarathonDayUserAPIView(APIView):
         marathon_day = MarathonDays.objects.filter(date=today, marathon=marathon).first()
 
         if not marathon_day.exists():
-            return Response({"message": langs.lang_msg("date_ot")}, status=status.HTTP_403_FORBIDDEN)
+            return Response({"message": langs.lang_msg("date_out")}, status=status.HTTP_403_FORBIDDEN)
 
         if not (marathon.start_date <= today <= marathon.end_date):
             return Response(
@@ -521,9 +525,135 @@ class StatisticUserMarathonAPIView(APIView):
         return Response({"users": serializer.data})
 
 
-class UserStaticUserDetailAPIView(APIView):
-    ...
 
+class MarathonAdminView(APIView):
+
+    permission_classes = [AllowAny]
+
+
+    def get(self, request, marathon_id, user_id):
+
+        user_id_owner = request.user.id
+
+        lang = request.query_params.get("lang", "ru")
+        select_day = int(request.query_params.get("day", 1))
+
+        if not user_id:
+            return Response(
+                {"message": "user id is not found"},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
+        today = timezone.now().date()
+
+        # ✅ проверка что пользователь админ марафона
+        marathon = ChallengeMarathon.objects.filter(
+            pk=marathon_id,
+            user__user_id=user_id_owner
+        ).first()
+
+        if not marathon:
+            return Response(
+                {"message": "you is not admin in marathon"},
+                status=status.HTTP_403_FORBIDDEN
+            )
+
+        # --------------------------------------------------
+        # DAYS (НЕ ТРОГАЕМ ЛОГИКУ)
+        # --------------------------------------------------
+
+        marathon_days = list(
+            MarathonDays.objects.filter(
+                marathon_id=marathon_id
+            ).order_by("date")
+        )
+
+        marathon_challenges = list(
+            marathon.challenges.all().values(
+                "id", "approach", "number_times"
+            )
+        )
+
+        user_records = MarathonDayUser.objects.filter(
+            user__user_id=user_id,
+            marathon_day__marathon_id=marathon_id
+        ).values(
+            "marathon_day_id", "challenge_id"
+        ).annotate(
+            total_number_times=Sum("number_times")
+        )
+
+        records_map = {}
+        for rec in user_records:
+            records_map.setdefault(
+                rec["marathon_day_id"], {}
+            )[rec["challenge_id"]] = rec["total_number_times"]
+
+        days = []
+
+        for index, day in enumerate(marathon_days, start=1):
+
+            if day.date > today:
+                status_ = "waiting"
+            else:
+                day_records = records_map.get(day.id, {})
+
+                if not day_records:
+                    status_ = "danger"
+                else:
+                    all_ok = True
+
+                    for ch in marathon_challenges:
+                        done_times = day_records.get(ch["id"], 0)
+
+                        if done_times < ch["number_times"] * ch["approach"]:
+                            all_ok = False
+                            break
+
+                    status_ = "success" if all_ok else "warning"
+
+            days.append({
+                "day": index,
+                "status": status_
+            })
+
+        # --------------------------------------------------
+        # ✅ ВЫБОР ДНЯ ПО НОМЕРУ (НЕ ID)
+        # --------------------------------------------------
+
+        try:
+            selected_day_obj = marathon_days[select_day - 1]
+        except IndexError:
+            return Response(
+                {"message": "day not found"},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
+        # --------------------------------------------------
+        # ✅ ВИДЕО ПОЛЬЗОВАТЕЛЯ ЗА ЭТОТ ДЕНЬ
+        # --------------------------------------------------
+
+        videos_queryset = MarathonDayUser.objects.filter(
+            user__user_id=user_id,
+            marathon_day_id=selected_day_obj.id
+        )
+
+        s3_service = S3Service()
+
+        challenges = ChallengeDailySerializer(
+            videos_queryset,
+            many=True,
+            context={"s3_service": s3_service}
+        ).data
+
+        # --------------------------------------------------
+
+        response = {
+            "challenges": challenges,
+            "days": days
+        }
+
+        return Response(response, status=status.HTTP_200_OK)
 
 
 

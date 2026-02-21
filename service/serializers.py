@@ -8,6 +8,7 @@ from utils.s3_operations import S3Service
 from grpc_serivces.grpc_challenge.client import ChallengeInfo
 from utils.langs import LangsSignleton
 
+from utils.s3_operations import S3Service
 from grpc_serivces.grpc_profile.client import ProfileInfo
 
 class ChallengeSerializer(serializers.ModelSerializer):
@@ -91,6 +92,7 @@ class MarathonDayUserSerializer(serializers.ModelSerializer):
 
         return data
 
+
 class StatisticUsersMarathonSerializer(serializers.Serializer):
     user_id = serializers.IntegerField(read_only=True)
     age = serializers.IntegerField(source="user.age", read_only=True)
@@ -129,9 +131,17 @@ class ChallengeDailySerializer(serializers.ModelSerializer):
         model = MarathonDayUser
         fields = ["video"]
 
-    def get_video(self, obj):
+    def get_video(self, obj: MarathonDayUser) -> str:
 
-        ...
+        s3_service: S3Service = self.context.get("s3_service", False)
+
+        if not s3_service:
+
+            return ""
+        
+        response = s3_service.get_presigned_url(f"{obj.folder}/{obj.video}")
+
+        return response
 
 
 # class StatisticUserDetailSerializer(serializers.ModelSerializer):
