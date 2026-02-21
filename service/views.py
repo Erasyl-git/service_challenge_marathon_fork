@@ -397,6 +397,9 @@ class MarathonDayUserAPIView(APIView):
 
         marathon_user = marathon_day_user.last()
 
+        print(marathon_day_user)
+        print(marathon_user.number_times if marathon_user else 0)
+
         return Response(self.serializer_class(marathon_day, 
                                               context={"approach": marathon_day_user.count(), 
                                                        "challenge_id": challenge_id, 
