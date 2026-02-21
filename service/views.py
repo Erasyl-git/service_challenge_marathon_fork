@@ -393,7 +393,7 @@ class MarathonDayUserAPIView(APIView):
         
         marathon_day = get_object_or_404(MarathonDays, marathon=marathon, date=today)
 
-        marathon_day_user = MarathonDayUser.objects.filter(user__user_id=user_id, marathon_day=marathon_day, challenge=challenge).order_by("-marathon_day__date")
+        marathon_day_user = MarathonDayUser.objects.filter(user__user_id=user_id, marathon_day=marathon_day, challenge=challenge).order_by("id")
 
         marathon_user = marathon_day_user.last()
 
