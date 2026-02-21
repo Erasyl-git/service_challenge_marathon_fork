@@ -362,7 +362,7 @@ class MarathonDayUserAPIView(APIView):
 
     def get(self, request, marathon_id):
 
-        user_id = 69# request.user.id
+        user_id = request.user.id
         lang = request.query_params.get("lang", "ru")
 
 
