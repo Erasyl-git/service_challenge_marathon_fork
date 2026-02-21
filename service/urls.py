@@ -11,3 +11,5 @@ urlpatterns = [
     path("marathon/<int:marathon_id>/statistics/user/<int:user_id>/", StatisticUserMarathonAPIView.as_view())
 
 ]
+
+

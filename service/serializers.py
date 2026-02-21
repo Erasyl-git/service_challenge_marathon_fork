@@ -12,19 +12,21 @@ from grpc_serivces.grpc_profile.client import ProfileInfo
 
 class ChallengeSerializer(serializers.ModelSerializer):
 
-    cv_name = serializers.SerializerMethodField()
-
-
     class Meta:
 
         model = Challenge
-        fields = ["cv_name", "approach", "number_times"]
+        fields = ["approach", "number_times"]
 
-    def get_cv_name(self, obj):
+    def to_representation(self, instance):
+        data = super().to_representation(instance)
 
-        cv_name = ChallengeInfo().get_challenge(obj.challenge_id).cv_name
+        challenge = ChallengeInfo().get_challenge(instance.challenge_id)
 
-        return str(cv_name)
+        data["cv_name"] = challenge.cv_name
+
+        data["name"] = challenge.name
+
+        return data
 
 
 

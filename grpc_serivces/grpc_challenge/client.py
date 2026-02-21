@@ -26,7 +26,6 @@ class ChallengeInfo:
 
     def get_challenge(self, id: int) -> Dict[str, str]:
 
-
         request = challenge_pb2.ResponseChallengeId(id=id)
 
         try:
@@ -36,3 +35,6 @@ class ChallengeInfo:
             raise ConnectionError("user not found or access challenge is not Found" + f"{e}")
         
         return response
+
+
+
