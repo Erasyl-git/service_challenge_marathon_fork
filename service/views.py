@@ -290,12 +290,12 @@ class MarathonDayAPIView(APIView):
 
         for index, day in enumerate(marathon_days, start=1):
             if day.date > today:
-                status = "waiting"
+                status_ = "waiting"
             else:
                 day_records = records_map.get(day.id, {})
                 print(day_records)        
                 if not day_records:
-                    status = "danger"
+                    status_ = "danger"
                 else:
                     all_ok = True
                     for ch in marathon_challenges:
@@ -303,11 +303,11 @@ class MarathonDayAPIView(APIView):
                         if done_times < ch["number_times"] * ch["approach"]:
                             all_ok = False
                             break
-                    status = "success" if all_ok else "warning"
+                    status_ = "success" if all_ok else "warning"
 
             days.append({
                 "day": index,
-                "status": status
+                "status": status_
             })
 
 
@@ -448,7 +448,7 @@ class MarathonDayUserAPIView(APIView):
                 status=status.HTTP_403_FORBIDDEN
             )
         
-        status = "success" if number_times == challenge.number_times else "warning"
+        status_ = "success" if number_times == challenge.number_times else "warning"
         
         user = get_object_or_404(UserSmall, user_id=user_id)
 
@@ -461,7 +461,8 @@ class MarathonDayUserAPIView(APIView):
                 number_times=number_times,
                 score=score,
                 callories=callories,
-                video=video_name
+                video=video_name,
+                status=status_
             )
 
             transaction.on_commit(
