@@ -395,7 +395,7 @@ class MarathonDayUserAPIView(APIView):
 
         marathon_day_user = MarathonDayUser.objects.filter(user__user_id=user_id, marathon_day=marathon_day, challenge=challenge).order_by("-marathon_day__date")
 
-        marathon_user = marathon_day_user.first()
+        marathon_user = marathon_day_user.last()
 
         return Response(self.serializer_class(marathon_day, 
                                               context={"approach": marathon_day_user.count(), 
