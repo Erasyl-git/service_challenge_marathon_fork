@@ -231,16 +231,35 @@ class MarathonDetailAPIView(APIView):
         if (today >= marathon.start_date):
             return Response({"message": langs.lang_msg("marathon_exp")}, status=status.HTTP_403_FORBIDDEN)
 
-        user_small_data, craeted = UserSmall.objects.get_or_create(
-            user_id=user_id,
-            age=user_data_dict.age,
-            male=user_data_dict.gender,
-            weight=user_data_dict.weight,
-            height=user_data_dict.height
+        user_small_qs = UserSmall.objects.filter(user_id=user_id)
+
+        if user_small_qs.exists():
+            # Берём первый
+            user_small_data = user_small_qs.first()
+            # Обновляем актуальные данные
+            user_small_data.age = user_data_dict.age
+            user_small_data.male = user_data_dict.gender
+            user_small_data.weight = user_data_dict.weight
+            user_small_data.height = user_data_dict.height
+            user_small_data.save()
+
+            # Удаляем дубли, если есть
+            user_small_qs.exclude(id=user_small_data.id).delete()
+        else:
+            # Создаём новый
+            user_small_data = UserSmall.objects.create(
+                user_id=user_id,
+                age=user_data_dict.age,
+                male=user_data_dict.gender,
+                weight=user_data_dict.weight,
+                height=user_data_dict.height
+            )
+
+        # Создаём привязку к марафону
+        marathon_user, created = ChallengeMarathonUser.objects.get_or_create(
+            user=user_small_data,
+            marathon=marathon
         )
-
-        marathon_user, created = ChallengeMarathonUser.objects.get_or_create(user=user_small_data, marathon=marathon)
-
         return Response({"message": "success"}, status=status.HTTP_200_OK)
 
 
