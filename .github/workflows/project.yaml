@@ -27,7 +27,7 @@ jobs:
       
       - name: Copy files to server
         run: |
-          rsync -avz --rsh="ssh -o StrictHostKeyChecking=no" . deployer@178.88.115.140:/home/deployer/service_challenge_marathon
+          rsync -avz --rsh="ssh -o StrictHostKeyChecking=no" . deployer@178.88.115.140:/home/deployer/service_challenge_marathon_fork
           
       - name: Container building and restarting
         run: |
