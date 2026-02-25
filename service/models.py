@@ -112,17 +112,19 @@ class MarathonDayUser(models.Model):
 
 
 
-# class ClubMarathon(models.Model):
+class ClubMarathon(models.Model):
 
-#     name = models.CharFiel
+    name = models.CharField(max_length=100)
+
+    description = models.CharField(max_length=100)
+
+    source = models.CharField()
+
+    folder = models.CharField(default="marathon-day-user")
 
 
+class ClubUserr(models.Model):
 
+    user_id = models.IntegerField()
 
-
-
-# class ClubUserr(models.Model):
-
-#     user_id = models.IntegerField()
-
-#     club = models.ForeignKey(ClubMarathon, on_delete=models.CASCADE, null=True, blank=True)
+    club = models.ForeignKey(ClubMarathon, on_delete=models.CASCADE, null=True, blank=True)
