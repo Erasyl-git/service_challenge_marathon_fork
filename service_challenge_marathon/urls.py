@@ -6,5 +6,5 @@ from django.urls import path, include
 
 urlpatterns = [
     path('admin/', admin.site.urls),
-    path('api/challenge-marathon/', include("service.urls"))
+    path('api/challenge-marathon-fork/', include("service.urls"))
 ]
