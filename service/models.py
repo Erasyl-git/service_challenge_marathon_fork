@@ -112,3 +112,4 @@ class MarathonDayUser(models.Model):
 
 
 
+# class ClubMarathon
