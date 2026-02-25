@@ -1,6 +1,6 @@
 from rest_framework import serializers
 
-from .models import Challenge, ChallengeMarathon, ChallengeMarathonUser, MarathonDays, MarathonDayUser
+from .models import Challenge, ChallengeMarathon, ChallengeMarathonUser, MarathonDays, MarathonDayUser, ClubMarathon, ClubUserr
 
 import datetime
 
@@ -147,3 +147,19 @@ class ChallengeDailySerializer(serializers.ModelSerializer):
 # class StatisticUserDetailSerializer(serializers.ModelSerializer):
 
 #     ...
+
+class ClubMarathonSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = ClubMarathon
+        fields = ["id", "name", "description", "source", "folder"]
+
+
+
+class ClubUserrSerializer(serializers.ModelSerializer):
+    club = ClubMarathonSerializer(read_only=True)
+
+    class Meta:
+        model = ClubUserr
+        fields = ["id", "user_id", "club"]
+
+        

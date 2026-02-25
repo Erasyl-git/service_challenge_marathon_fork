@@ -26,8 +26,8 @@ from django.db.models import Sum
 from grpc_serivces.grpc_challenge.client import ChallengeInfo
 from grpc_serivces.grpc_profile.client import ProfileInfo
 
-from .models import ChallengeMarathon, Challenge, MarathonDays, ChallengeMarathonUser, UserSmall, MarathonDayUser
-from .serializers import MarathonDetailSerializer, MarathonSerializer, MarathonDayUserSerializer, StatisticUsersMarathonSerializer, ChallengeDailySerializer
+from .models import ChallengeMarathon, Challenge, MarathonDays, ChallengeMarathonUser, UserSmall, MarathonDayUser, ClubMarathon, ClubUserr
+from .serializers import MarathonDetailSerializer, MarathonSerializer, MarathonDayUserSerializer, StatisticUsersMarathonSerializer, ChallengeDailySerializer, ClubMarathonSerializer, ClubUserrSerializer
 
 from utils.langs import LangsSignleton
 from utils.s3_operations import S3Service

@@ -50,3 +50,9 @@ class MarathonDaysAdmin(admin.ModelAdmin):
     list_display = ("id", "marathon", "date")
     list_filter = ("marathon",)
     search_fields = ("marathon__name",)
+
+
+
+admin.site.site_header = "Sport Integration in Parliament"
+admin.site.site_title = "Админ панель"
+admin.site.index_title = "Добро пожаловать в админку"
