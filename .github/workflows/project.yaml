@@ -32,7 +32,7 @@ jobs:
       - name: Container building and restarting
         run: |
           ssh deployer@178.88.115.140 << 'EOF'
-          cd /home/deployer/service_challenge_marathon/ || exit 1
+          cd /home/deployer/service_challenge_marathon_fork/ || exit 1
           docker compose down --remove-orphans
           docker compose up -d --build
           EOF

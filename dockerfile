@@ -16,7 +16,7 @@ RUN pip install --upgrade pip && pip install -r req.txt
 
 COPY . /app/
 
-EXPOSE 8009
+EXPOSE 8010
 
 # CMD ["gunicorn", "service_profiles.wsgi:application", "--bind", "0.0.0.0:8000", "--workers", "3"]
 CMD ["python", "start.py"]
